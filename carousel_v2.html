@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+<style>
+.wcd-responsive-carousel__wrapper {
+      width:100%;
+      margin:10px auto;
+      display:none;
+  }
+
+  .wcd-responsive-carousel__wrapper img {
+      max-width:100%;
+      width:100%;
+  }
+
+  .wcd-responsive-carousel__view {
+      width:100%;
+      overflow:hidden;
+  }
+
+  .wcd-responsive-carousel__items div {
+      float:left;
+  }
+
+  .wcd-responsive-carousel__indicators {
+      margin:5px auto 0px auto;
+      text-align:center;
+  }
+
+  .wcd-responsive-carousel__indicators ul {
+      list-style-type: none;
+      margin:0;
+      padding:0;
+      border:0;
+  }
+
+  .wcd-responsive-carousel__indicators ul li {
+      margin:0;
+      padding:0;
+      display:block;
+      float:left;
+  }
+
+  .wcd-responsive-carousel__indicators div {
+      float:left;
+      width:10px;
+      height:10px;
+      margin-right:6px;
+      border-radius:50%;
+      background-color:#000;
+      opacity:0.5;
+  }
+  .wcd-responsive-carousel__indicators div.active {
+    opacity:1;
+  }
+
+  .wcd-responsive-carousel__items ul {
+      -webkit-transition-timing-function: cubic-bezier(.44,.03,.58,1);
+      transition-timing-function: cubic-bezier(.44,.03,.58,1);
+  }
+
+</style>
+
+</head>
+
+<body>
+
+<div style="width:100%;max-width:700px;">
+
+
+      <div class="wcd-responsive-carousel__wrapper" autoAdvance="true" showIndicators="true" advanceSpeed="2000">
+        <div class="wcd-responsive-carousel__view">
+            <div class="wcd-responsive-carousel__items">
+                <div>
+                    <img src="http://www1.assets-gap.com/Asset_Archive/GPWeb/content/0009/717/252/skinny_banner_prototype/assets/prototype_moban_carousel_1.gif" />
+                </div>
+                <div>
+                    <img src="http://www1.assets-gap.com/Asset_Archive/GPWeb/content/0009/717/252/skinny_banner_prototype/assets/prototype_moban_carousel_2.gif" />
+                </div>
+                <div>
+                    <img src="http://www1.assets-gap.com/Asset_Archive/GPWeb/content/0009/717/252/skinny_banner_prototype/assets/prototype_moban_carousel_3.gif" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+    <div class="wcd-responsive-carousel__wrapper">
+        <div class="wcd-responsive-carousel__view">
+            <div class="wcd-responsive-carousel__items">
+                <div>
+                    <img src="http://www1.assets-gap.com/Asset_Archive/GPWeb/content/0009/717/252/skinny_banner_prototype/assets/prototype_moban_carousel_1.gif" />
+                </div>
+                <div>
+                    <img src="http://www1.assets-gap.com/Asset_Archive/GPWeb/content/0009/717/252/skinny_banner_prototype/assets/prototype_moban_carousel_2.gif" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+<script>
+
+  function wcdResponsiveCarousel() {
+    jQuery('.wcd-responsive-carousel__wrapper').each(function(){ 
+      var thisCarousel = new WcdCarousel(jQuery(this));
+      thisCarousel.getCurrentDimensions(false);
+    });
+  }
+  function WcdCarousel(obj) {
+    this.wrapper = obj;
+    this.currentSlide = 1;
+    this.carouselView = this.wrapper.find('.wcd-responsive-carousel__view');
+    this.carouselItems = this.wrapper.find('.wcd-responsive-carousel__items');
+    this.carouselLength = this.carouselItems.children().length;
+    this.isTwoSlides = (this.carouselLength==2) ? true : false;
+    this.hasInitialized = false;
+    this.timer = "";
+    this.timerSet = false;
+    this.autoAdv = (typeof obj.attr('autoAdvance')!='undefined' && obj.attr('autoAdvance')=='true') ? true : false;
+    this.showInd = (typeof obj.attr('showIndicators')!='undefined' && obj.attr('showIndicators')=='true') ? true : false;
+  }
+  WcdCarousel.prototype = {
+    constructor : WcdCarousel,
+    getCurrentDimensions : function(isOrientationChange) {
+      this.carouselWidth = this.wrapper.width();
+      this.resetPosition = this.createTranslateString(this.carouselWidth * -1);
+      this.nextPosition = this.createTranslateString(this.carouselWidth * -2);
+      this.previousPosition = this.createTranslateString(0);
+      this.setDimensions(isOrientationChange);
+      if (!isOrientationChange) {
+        if (this.showInd) {
+          this.addIndicators();
+        }
+        this.addEventListeners();
+      }
+    },
+    setDimensions : function(isOrientationChange) {
+      if (this.isTwoSlides) {
+        this.carouselItems.css({'width':this.carouselWidth * 4 + "px"});
+      }
+      else {
+        this.carouselItems.css({'width':(this.carouselWidth * this.carouselLength) + "px"});
+      }
+      this.carouselItems.children('div').css({'width':this.carouselWidth + "px"});
+      if (!this.hasInitialized) {
+          this.hasInitialized = true;
+          if (this.isTwoSlides) {
+              this.carouselItems.children('div').clone().appendTo(this.carouselItems);
+          }
+          this.wrapper.show();
+          this.repositionSlides(false);
+      }
+      if (isOrientationChange) {
+          this.translateCarousel(this.resetPosition,'0ms');
+      }
+      if (this.autoAdv) {
+          this.setAutoAdvance();
+      }
+    },
+    setAutoAdvance : function() {
+      var $this = this;
+      if (!this.timerSet) {
+        this.timer = setInterval(function() {
+          $this.advanceCarousel(300,true,true);
+        },3000);
+        this.timerSet = true;
+      }
+    },
+    repositionSlides : function(isNext) {
+      if (isNext) {
+        this.carouselItems.children().last().after(this.carouselItems.children().first());
+      }
+      else {
+        this.carouselItems.children().first().before(this.carouselItems.children().last());
+      }
+      this.translateCarousel(this.resetPosition,'0ms');
+    },
+    translateCarousel : function(translateString,translateTime) {
+      this.carouselItems.css({
+        'transform': translateString,
+        '-webkit-transform': translateString,
+        '-webkit-transition-duration':translateTime,
+        'transition-duration':translateTime
+      });
+    },
+    advanceCarousel : function(translateTime,isNext,isAuto) {
+      var $this = this;
+      var translateString = (isNext) ? this.nextPosition : this.previousPosition;
+      this.translateCarousel(translateString,translateTime + 'ms');
+      setTimeout(function() { 
+        $this.repositionSlides(isNext);
+        if ($this.autoAdv && !isAuto) {
+            $this.setAutoAdvance();
+        }
+      },translateTime);
+      if (this.showInd) {
+          (isNext) ? this.currentSlide++ : this.currentSlide--;
+          if (this.currentSlide<1) {
+              this.currentSlide = this.carouselLength;
+          }
+          else if (this.currentSlide>this.carouselLength) {
+              this.currentSlide = 1;
+          }
+          var curInd = this.indicatorDiv.find('li:nth-child(' + this.currentSlide + ') div');
+          curInd.addClass('active');
+          this.indicatorDiv.find('li div').not(curInd).removeClass('active');
+      }
+    },
+    addIndicators : function() {
+      this.indicatorDiv = jQuery("<div class='wcd-responsive-carousel__indicators'></div>");
+      this.indicatorDiv.append("<ul></ul>");
+      for (i=0;i<this.carouselLength;i++) {
+        var indicator = (i==0) ? "<div class='active'></div>" : "<div></div>";
+        var htmlToAdd = "<li>" + indicator + "</li>";
+        this.indicatorDiv.children('ul').append(htmlToAdd);
+      } //end for 
+      this.indicatorDiv.appendTo(this.carouselView);
+      this.carouselView.append("<div style='clear:both;'></div>");
+      var indicatorDivWidth = jQuery('.wcd-responsive-carousel__indicators li:first-child').outerWidth() * this.carouselLength + "px";
+      this.indicatorDiv.css({'width':indicatorDivWidth});
+    },
+    addEventListeners : function() {
+      var $this = this;
+      var startX,startY,startTime,startPos,deltaX,deltaY,currentPos;
+      var threshold = this.carouselWidth / 3.5;
+      var carouselView = this.wrapper.children('div.wcd-responsive-carousel__view'); 
+      carouselView.on('touchstart',function(event) { 
+          var e = event.originalEvent;
+          startTime = new Date().getTime();
+          if ($this.autoAdv) {
+              clearInterval($this.timer);
+              $this.timerSet = false;
+          }
+          startPos = $this.parseMatrix($this.carouselItems.css('-webkit-transform'));
+          startX = Math.round(e.changedTouches[0].clientX);
+          startY = Math.round(e.changedTouches[0].clientY);
+          deltaX = 0;
+          deltaY = 0;
+          $this.carouselItems.css({
+              'transition-duration':'0ms',
+              '-webkit-transition-duration':'0ms'
+          });
+      });
+      carouselView.on('touchmove',function(event) { 
+          var e = event.originalEvent;
+          deltaX = Math.round(e.changedTouches[0].clientX) - startX;
+          deltaY = Math.abs(e.changedTouches[0].clientY - startY);
+          if (Math.abs(deltaY) < 8) {
+            event.preventDefault();
+          }
+          if (Math.abs(deltaY) / Math.abs(deltaX)<1) {
+            var tempPos = startPos + deltaX;
+            if (tempPos>=($this.carouselWidth * -2) && tempPos<=0) {
+              currentPos = tempPos;
+              var newTranslate = $this.createTranslateString(currentPos);
+              $this.carouselItems.css({
+                'transform' : newTranslate,
+                '-webkit-transform' : newTranslate
+              });
+            }
+          }
+      });
+      carouselView.on('touchend',function(event){
+          if (deltaX>threshold) {
+              var translateTime = Math.abs(0 - currentPos) + 150;
+              $this.advanceCarousel(translateTime,false);
+          }
+          else if (deltaX<threshold * -1) {
+              var translateTime = Math.abs(currentPos - ($this.carouselWidth * -2)) + 150;
+              $this.advanceCarousel(translateTime,true);
+          }
+          else if (Math.abs(deltaX)<1 && Math.abs(deltaY)<1) {
+              jQuery(document).trigger('wcdResponsiveCarousel:click');
+              if ($this.autoAdv) {
+                $this.setAutoAdvance();
+              }
+          }
+          else {
+              var translateTime = Math.abs(currentPos - startPos) + 150 + 'ms';
+              $this.translateCarousel($this.resetPosition,translateTime);
+              if ($this.autoAdv) {
+                $this.setAutoAdvance();
+              }
+          }
+      });
+      jQuery(window).on('orientationchange',function() {
+          if ($this.autoAdv) {
+              clearInterval($this.timer);
+              $this.timerSet = false;
+          }
+          setTimeout(function(){
+            $this.getCurrentDimensions(true);
+          },100);
+      });
+    },
+    createTranslateString : function(value) {
+      var translateString = "translate3d(" + value + "px,0px,0px)";
+      return translateString;
+    },
+    parseMatrix : function(translateMatrix) {
+      var matrixString = translateMatrix.substr(translateMatrix.indexOf('(') + 1,(translateMatrix.indexOf(')') - 1) - translateMatrix.indexOf('('));
+      var matrixArray = matrixString.split(',');
+      var translateXValue = parseInt(matrixArray[4]);
+      return translateXValue;
+    }
+  };
+
+
+  jQuery(document).ready(function() { 
+    wcdResponsiveCarousel();
+  });
+
+</script>
+
+</body>
+</html>
+
